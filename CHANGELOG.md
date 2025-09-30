@@ -5,7 +5,7 @@ All notable changes to the AI Ticket Classifier project will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.1] - 2025-01-30
+## [0.1.1] - 2025-09-30
 
 ### Fixed
 - Fixed import paths in example files to work when run directly
@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added printer-related keywords (toner, queue, jam)
 - Added more application error patterns for common apps (excel, word, outlook)
 
-## [0.1.0] - 2025-01-30
+## [0.1.0] - 2025-09-30
 
 ### Added
 - Initial release of AI Ticket Classifier
