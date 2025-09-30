@@ -2,6 +2,10 @@
 Basic usage example for AI Ticket Classifier
 """
 
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 from ticket_classifier import TicketClassifier
 
 # Create classifier with default categories

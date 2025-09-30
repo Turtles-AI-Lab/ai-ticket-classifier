@@ -56,13 +56,19 @@ DEFAULT_CATEGORIES = [
     TicketCategory(
         name="printer_issue",
         description="Printer not working or printing problems",
-        keywords=["printer", "print", "printing", "print queue", "spooler", "paper jam"],
+        keywords=["printer", "print", "printing", "queue", "spooler", "jam", "toner"],
         patterns=[
-            r"printer.*not.*work",
+            r"printer.*not.*work\w*",
+            r"printer.*is.*not.*work\w*",
+            r"printer.*down",
+            r"printer.*broken",
             r"can'?t.*print",
+            r"print.*not.*work\w*",
             r"print.*queue",
             r"spooler",
-            r"paper.*jam"
+            r"paper.*jam",
+            r"printer.*issue",
+            r"printer.*problem"
         ],
         priority="medium",
         auto_resolvable=True
@@ -73,7 +79,7 @@ DEFAULT_CATEGORIES = [
         description="Email sending, receiving, or configuration problems",
         keywords=["email", "outlook", "can't send", "can't receive", "mailbox", "smtp", "exchange"],
         patterns=[
-            r"email.*not.*work",
+            r"email.*not.*work\w*",
             r"can'?t.*send.*email",
             r"can'?t.*receive",
             r"outlook.*error",
@@ -86,12 +92,19 @@ DEFAULT_CATEGORIES = [
     TicketCategory(
         name="software_install",
         description="Software installation or update request",
-        keywords=["install", "software", "application", "app", "program", "need access"],
+        keywords=["install", "software", "application", "teams", "zoom", "office", "chrome"],
         patterns=[
             r"install.*software",
-            r"need.*access.*to",
+            r"install.*\w+.*on",
+            r"need.*install",
             r"install.*application",
-            r"download.*and.*install"
+            r"download.*and.*install",
+            r"please.*install",
+            r"need.*\w+.*on.*laptop",
+            r"need.*\w+.*on.*computer",
+            r"install.*teams",
+            r"install.*zoom",
+            r"install.*office"
         ],
         priority="medium",
         auto_resolvable=False
@@ -100,13 +113,19 @@ DEFAULT_CATEGORIES = [
     TicketCategory(
         name="network_issue",
         description="Network connectivity or VPN problems",
-        keywords=["network", "internet", "wifi", "vpn", "connection", "can't connect", "no internet"],
+        keywords=["network", "internet", "wifi", "vpn", "connection", "ethernet", "lan"],
         patterns=[
             r"no.*internet",
             r"can'?t.*connect",
-            r"vpn.*not.*work",
+            r"vpn.*not.*work\w*",
             r"wifi.*down",
-            r"network.*issue"
+            r"wifi.*not.*work\w*",
+            r"wifi.*is.*not.*work\w*",
+            r"network.*issue",
+            r"network.*down",
+            r"no.*connection",
+            r"internet.*slow",
+            r"no.*wifi"
         ],
         priority="high",
         auto_resolvable=False
@@ -130,13 +149,16 @@ DEFAULT_CATEGORIES = [
     TicketCategory(
         name="hardware_issue",
         description="Hardware malfunction or replacement needed",
-        keywords=["hardware", "broken", "monitor", "keyboard", "mouse", "laptop", "computer"],
+        keywords=["hardware", "broken", "monitor", "keyboard", "mouse", "laptop", "computer", "screen"],
         patterns=[
             r"hardware.*fail",
-            r"broken.*monitor",
-            r"keyboard.*not.*work",
-            r"mouse.*not.*work",
-            r"laptop.*broken"
+            r"monitor.*broken",
+            r"monitor.*not.*work\w*",
+            r"keyboard.*not.*work\w*",
+            r"mouse.*not.*work\w*",
+            r"laptop.*broken",
+            r"screen.*broken",
+            r"\w+.*is.*broken"
         ],
         priority="medium",
         auto_resolvable=False
@@ -160,13 +182,17 @@ DEFAULT_CATEGORIES = [
     TicketCategory(
         name="application_error",
         description="Application crash, error, or performance issue",
-        keywords=["error", "crash", "slow", "frozen", "not responding", "bug"],
+        keywords=["error", "crash", "slow", "frozen", "not responding", "bug", "excel", "word", "outlook"],
         patterns=[
             r"application.*crash",
             r"program.*error",
             r"not.*responding",
             r"software.*slow",
-            r"keeps.*crashing"
+            r"keeps.*crashing",
+            r"\w+.*crash",
+            r"\w+.*keeps.*crash",
+            r"\w+.*frozen",
+            r"\w+.*error"
         ],
         priority="medium",
         auto_resolvable=False

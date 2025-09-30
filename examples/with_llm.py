@@ -3,7 +3,10 @@ Example using LLM for more accurate classification
 Requires OpenAI API key or local LLM setup
 """
 
+import sys
 import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 from ticket_classifier import LLMClassifier
 
 # Option 1: OpenAI

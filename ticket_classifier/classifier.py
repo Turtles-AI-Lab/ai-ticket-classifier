@@ -52,7 +52,7 @@ class TicketClassifier:
         """
         self.categories = categories if categories is not None else DEFAULT_CATEGORIES
 
-    def classify(self, ticket_text: str, threshold: float = 0.3) -> ClassificationResult:
+    def classify(self, ticket_text: str, threshold: float = 0.25) -> ClassificationResult:
         """
         Classify a ticket based on its text content
 
@@ -83,7 +83,7 @@ class TicketClassifier:
 
         return ClassificationResult(best_category, best_score, best_matches)
 
-    def classify_batch(self, tickets: List[str], threshold: float = 0.3) -> List[ClassificationResult]:
+    def classify_batch(self, tickets: List[str], threshold: float = 0.25) -> List[ClassificationResult]:
         """
         Classify multiple tickets
 

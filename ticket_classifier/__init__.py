@@ -3,7 +3,7 @@ AI Ticket Classifier
 A lightweight Python library for classifying support tickets using pattern matching and optional LLM integration.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Turtles AI Lab"
 
 from .classifier import TicketClassifier
