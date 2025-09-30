@@ -1,0 +1,6 @@
+# Core dependencies (none required for basic pattern matching)
+
+# Optional dependencies for LLM support
+# Uncomment if you want to use LLM-based classification:
+# openai>=1.0.0
+# requests>=2.31.0
