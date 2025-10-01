@@ -143,20 +143,14 @@ class TicketClassifier:
                 keyword_matches += 1
 
         # Calculate weighted score
-        # Pattern matches are worth more than keyword matches
-        if category.patterns:
-            pattern_score = (pattern_matches / len(category.patterns)) * 0.7
-        else:
-            pattern_score = 0
+        # Each pattern match is worth 0.5, each keyword match is worth 0.1
+        # This rewards matches without penalizing categories with many patterns
+        pattern_score = min(pattern_matches * 0.5, 1.0)
+        keyword_score = min(keyword_matches * 0.1, 0.5)
 
-        if category.keywords:
-            keyword_score = (keyword_matches / len(category.keywords)) * 0.3
-        else:
-            keyword_score = 0
+        score = min(pattern_score + keyword_score, 1.0)
 
-        score = pattern_score + keyword_score
-
-        # Boost score if multiple patterns/keywords matched
+        # Boost score if multiple matches found
         if pattern_matches >= 2:
             score = min(score + 0.1, 1.0)
         if keyword_matches >= 3:
