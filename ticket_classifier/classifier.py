@@ -51,6 +51,8 @@ class TicketClassifier:
             categories: List of TicketCategory objects. If None, uses DEFAULT_CATEGORIES
         """
         self.categories = categories if categories is not None else DEFAULT_CATEGORIES
+        if not self.categories:
+            raise ValueError("categories list cannot be empty")
 
     def classify(self, ticket_text: str, threshold: float = 0.25) -> ClassificationResult:
         """
@@ -63,6 +65,19 @@ class TicketClassifier:
         Returns:
             ClassificationResult with the best matching category
         """
+        # Input validation
+        if ticket_text is None:
+            raise ValueError("ticket_text cannot be None")
+        if not isinstance(ticket_text, str):
+            raise TypeError(f"ticket_text must be str, not {type(ticket_text).__name__}")
+        if not 0.0 <= threshold <= 1.0:
+            raise ValueError(f"threshold must be between 0.0 and 1.0, got {threshold}")
+
+        # Limit text length for performance (avoid catastrophic backtracking)
+        MAX_TEXT_LENGTH = 5000
+        if len(ticket_text) > MAX_TEXT_LENGTH:
+            ticket_text = ticket_text[:MAX_TEXT_LENGTH]
+
         ticket_text_lower = ticket_text.lower()
         scores = []
 

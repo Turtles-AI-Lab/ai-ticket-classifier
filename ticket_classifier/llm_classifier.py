@@ -129,51 +129,55 @@ Your response (JSON only):"""
             raise ValueError(f"Unknown provider: {self.provider}")
 
     def _call_openai(self, prompt: str) -> Dict[str, Any]:
-        """Call OpenAI API"""
+        """Call OpenAI API (using v1.x API)"""
         try:
-            import openai
-            openai.api_key = self.api_key
+            from openai import OpenAI
 
-            response = openai.ChatCompletion.create(
+            client = OpenAI(api_key=self.api_key)
+            response = client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": "You are a support ticket classification system. Respond only with JSON."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.3,
-                max_tokens=150
+                max_tokens=150,
+                timeout=30.0
             )
 
             content = response.choices[0].message.content.strip()
             return json.loads(content)
 
         except ImportError:
-            raise ImportError("openai package required. Install with: pip install openai")
+            raise ImportError("openai package required. Install with: pip install openai>=1.0.0")
 
     def _call_azure(self, prompt: str) -> Dict[str, Any]:
-        """Call Azure OpenAI API"""
+        """Call Azure OpenAI API (using v1.x API)"""
         try:
-            import openai
-            openai.api_type = "azure"
-            openai.api_key = self.api_key
-            openai.api_base = self.api_base
-            openai.api_version = "2023-05-15"
+            from openai import AzureOpenAI
 
-            response = openai.ChatCompletion.create(
-                engine=self.model,
+            client = AzureOpenAI(
+                api_key=self.api_key,
+                api_version="2023-05-15",
+                azure_endpoint=self.api_base
+            )
+
+            response = client.chat.completions.create(
+                model=self.model,
                 messages=[
                     {"role": "system", "content": "You are a support ticket classification system. Respond only with JSON."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.3,
-                max_tokens=150
+                max_tokens=150,
+                timeout=30.0
             )
 
             content = response.choices[0].message.content.strip()
             return json.loads(content)
 
         except ImportError:
-            raise ImportError("openai package required. Install with: pip install openai")
+            raise ImportError("openai package required. Install with: pip install openai>=1.0.0")
 
     def _call_local(self, prompt: str) -> Dict[str, Any]:
         """Call local LLM (LM Studio, Ollama, etc.)"""
