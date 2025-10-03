@@ -11,8 +11,28 @@ class ClassificationResult:
     """Result of ticket classification"""
 
     def __init__(self, category: TicketCategory, confidence: float, matched_patterns: List[str]):
+        # Validate category
+        if category is None:
+            raise ValueError("category cannot be None")
+        if not isinstance(category, TicketCategory):
+            raise TypeError(f"category must be TicketCategory, not {type(category).__name__}")
+
+        # Validate confidence
+        if confidence is None:
+            raise ValueError("confidence cannot be None")
+        if not isinstance(confidence, (int, float)):
+            raise TypeError(f"confidence must be numeric, not {type(confidence).__name__}")
+        if not 0.0 <= confidence <= 1.0:
+            raise ValueError(f"confidence must be between 0.0 and 1.0, got {confidence}")
+
+        # Validate matched_patterns
+        if matched_patterns is None:
+            raise ValueError("matched_patterns cannot be None")
+        if not isinstance(matched_patterns, list):
+            raise TypeError(f"matched_patterns must be list, not {type(matched_patterns).__name__}")
+
         self.category = category
-        self.confidence = confidence
+        self.confidence = float(confidence)
         self.matched_patterns = matched_patterns
 
     def __repr__(self):
@@ -50,6 +70,13 @@ class TicketClassifier:
         Args:
             categories: List of TicketCategory objects. If None, uses DEFAULT_CATEGORIES
         """
+        if categories is not None:
+            if not isinstance(categories, list):
+                raise TypeError(f"categories must be list, not {type(categories).__name__}")
+            for i, category in enumerate(categories):
+                if not isinstance(category, TicketCategory):
+                    raise TypeError(f"categories[{i}] must be TicketCategory, not {type(category).__name__}")
+
         self.categories = categories if categories is not None else DEFAULT_CATEGORIES
         if not self.categories:
             raise ValueError("categories list cannot be empty")
@@ -109,6 +136,13 @@ class TicketClassifier:
         Returns:
             List of ClassificationResult objects
         """
+        if tickets is None:
+            raise ValueError("tickets cannot be None")
+        if not isinstance(tickets, list):
+            raise TypeError(f"tickets must be list, not {type(tickets).__name__}")
+        if not tickets:
+            raise ValueError("tickets list cannot be empty")
+
         return [self.classify(ticket, threshold) for ticket in tickets]
 
     def _calculate_score(self, text: str, category: TicketCategory) -> Tuple[float, List[str]]:
@@ -132,9 +166,14 @@ class TicketClassifier:
         # Check regex patterns (higher weight)
         pattern_matches = 0
         for pattern in category.patterns:
-            if re.search(pattern, text, re.IGNORECASE):
-                pattern_matches += 1
-                matched_patterns.append(pattern)
+            try:
+                if re.search(pattern, text, re.IGNORECASE):
+                    pattern_matches += 1
+                    matched_patterns.append(pattern)
+            except re.error as e:
+                # Skip invalid regex patterns with warning
+                import logging
+                logging.warning(f"Invalid regex pattern '{pattern}' in category '{category.name}': {e}")
 
         # Check keywords (lower weight)
         keyword_matches = 0
@@ -160,11 +199,38 @@ class TicketClassifier:
 
     def add_category(self, category: TicketCategory):
         """Add a custom category"""
+        if category is None:
+            raise ValueError("category cannot be None")
+        if not isinstance(category, TicketCategory):
+            raise TypeError(f"category must be TicketCategory, not {type(category).__name__}")
+
+        # Check for duplicate category names
+        if any(c.name == category.name for c in self.categories):
+            raise ValueError(f"Category with name '{category.name}' already exists")
+
         self.categories.append(category)
 
     def remove_category(self, category_name: str):
         """Remove a category by name"""
+        if category_name is None:
+            raise ValueError("category_name cannot be None")
+        if not isinstance(category_name, str):
+            raise TypeError(f"category_name must be str, not {type(category_name).__name__}")
+        if not category_name:
+            raise ValueError("category_name cannot be empty")
+
+        # Don't allow removing 'other' category
+        if category_name == "other":
+            raise ValueError("Cannot remove 'other' category - it is required as fallback")
+
+        original_count = len(self.categories)
         self.categories = [c for c in self.categories if c.name != category_name]
+
+        if len(self.categories) == original_count:
+            raise ValueError(f"Category '{category_name}' not found")
+
+        if not self.categories:
+            raise ValueError("Cannot remove last category")
 
     def get_categories(self) -> List[TicketCategory]:
         """Get all categories"""

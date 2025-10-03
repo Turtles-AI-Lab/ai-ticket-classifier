@@ -61,19 +61,50 @@ class LLMClassifier:
         Returns:
             ClassificationResult
         """
+        # Input validation
+        if ticket_text is None:
+            raise ValueError("ticket_text cannot be None")
+        if not isinstance(ticket_text, str):
+            raise TypeError(f"ticket_text must be str, not {type(ticket_text).__name__}")
+
         try:
             # Make LLM call
             response = self._call_llm(ticket_text)
 
-            # Parse response
-            category_name = response.get("category", "other")
-            confidence = response.get("confidence", 0.5)
+            # Validate response structure
+            if not isinstance(response, dict):
+                raise ValueError(f"LLM response must be a dict, got {type(response).__name__}")
+
+            # Parse and validate response fields
+            category_name = response.get("category")
+            if category_name is None:
+                category_name = "other"
+            if not isinstance(category_name, str):
+                category_name = "other"
+
+            confidence = response.get("confidence")
+            if confidence is None:
+                confidence = 0.5
+
+            # Validate and clamp confidence value
+            try:
+                confidence = float(confidence)
+                confidence = max(0.0, min(1.0, confidence))
+            except (ValueError, TypeError):
+                confidence = 0.5
+
             reasoning = response.get("reasoning", "")
+            if not isinstance(reasoning, str):
+                reasoning = ""
 
             # Get category object
             category = get_category_by_name(category_name)
-            if not category:
+            if category is None:
                 category = get_category_by_name("other")
+
+            # Final safety check - should never happen but prevents crash
+            if category is None:
+                raise ValueError("Could not find 'other' category in DEFAULT_CATEGORIES")
 
             return ClassificationResult(
                 category=category,
@@ -83,8 +114,12 @@ class LLMClassifier:
 
         except Exception as e:
             # Fallback to "other" category on error
-            print(f"LLM classification error: {e}")
+            # Use logging instead of print in production
+            import logging
+            logging.warning(f"LLM classification error: {e}")
             other_category = get_category_by_name("other")
+            if other_category is None:
+                raise ValueError("Could not find 'other' category in DEFAULT_CATEGORIES")
             return ClassificationResult(other_category, 0.0, [str(e)])
 
     def _call_llm(self, ticket_text: str) -> Dict[str, Any]:
@@ -132,7 +167,10 @@ Your response (JSON only):"""
         """Call OpenAI API (using v1.x API)"""
         try:
             from openai import OpenAI
+        except ImportError as e:
+            raise ImportError("openai package required. Install with: pip install openai>=1.0.0") from e
 
+        try:
             client = OpenAI(api_key=self.api_key)
             response = client.chat.completions.create(
                 model=self.model,
@@ -146,16 +184,35 @@ Your response (JSON only):"""
             )
 
             content = response.choices[0].message.content.strip()
-            return json.loads(content)
 
-        except ImportError:
-            raise ImportError("openai package required. Install with: pip install openai>=1.0.0")
+            # Validate response structure
+            if not content:
+                raise ValueError("Empty response from OpenAI API")
+
+            # Try to parse JSON with error handling
+            try:
+                parsed = json.loads(content)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Invalid JSON response from OpenAI: {content[:100]}") from e
+
+            # Validate response is a dictionary
+            if not isinstance(parsed, dict):
+                raise ValueError(f"Expected JSON object, got {type(parsed).__name__}")
+
+            return parsed
+
+        except Exception as e:
+            # Re-raise with context
+            raise RuntimeError(f"OpenAI API call failed: {str(e)}") from e
 
     def _call_azure(self, prompt: str) -> Dict[str, Any]:
         """Call Azure OpenAI API (using v1.x API)"""
         try:
             from openai import AzureOpenAI
+        except ImportError as e:
+            raise ImportError("openai package required. Install with: pip install openai>=1.0.0") from e
 
+        try:
             client = AzureOpenAI(
                 api_key=self.api_key,
                 api_version="2023-05-15",
@@ -174,16 +231,35 @@ Your response (JSON only):"""
             )
 
             content = response.choices[0].message.content.strip()
-            return json.loads(content)
 
-        except ImportError:
-            raise ImportError("openai package required. Install with: pip install openai>=1.0.0")
+            # Validate response structure
+            if not content:
+                raise ValueError("Empty response from Azure OpenAI API")
+
+            # Try to parse JSON with error handling
+            try:
+                parsed = json.loads(content)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Invalid JSON response from Azure: {content[:100]}") from e
+
+            # Validate response is a dictionary
+            if not isinstance(parsed, dict):
+                raise ValueError(f"Expected JSON object, got {type(parsed).__name__}")
+
+            return parsed
+
+        except Exception as e:
+            # Re-raise with context
+            raise RuntimeError(f"Azure OpenAI API call failed: {str(e)}") from e
 
     def _call_local(self, prompt: str) -> Dict[str, Any]:
         """Call local LLM (LM Studio, Ollama, etc.)"""
         try:
             import requests
+        except ImportError as e:
+            raise ImportError("requests package required. Install with: pip install requests") from e
 
+        try:
             api_url = self.api_base or "http://127.0.0.1:1234/v1"
 
             response = requests.post(
@@ -201,7 +277,28 @@ Your response (JSON only):"""
             )
 
             response.raise_for_status()
-            content = response.json()["choices"][0]["message"]["content"].strip()
+
+            # Validate response structure
+            try:
+                response_data = response.json()
+            except ValueError as e:
+                raise ValueError(f"Invalid JSON response from local LLM API: {response.text[:100]}") from e
+
+            # Validate response has expected structure
+            if not isinstance(response_data, dict):
+                raise ValueError(f"Expected JSON object from API, got {type(response_data).__name__}")
+
+            if "choices" not in response_data:
+                raise ValueError("Response missing 'choices' field")
+
+            if not response_data["choices"] or len(response_data["choices"]) == 0:
+                raise ValueError("Response 'choices' array is empty")
+
+            content = response_data["choices"][0]["message"]["content"].strip()
+
+            # Validate content
+            if not content:
+                raise ValueError("Empty response content from local LLM")
 
             # Try to extract JSON if wrapped in markdown
             if "```json" in content:
@@ -209,7 +306,20 @@ Your response (JSON only):"""
             elif "```" in content:
                 content = content.split("```")[1].split("```")[0].strip()
 
-            return json.loads(content)
+            # Try to parse JSON with error handling
+            try:
+                parsed = json.loads(content)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Invalid JSON response from local LLM: {content[:100]}") from e
 
-        except ImportError:
-            raise ImportError("requests package required. Install with: pip install requests")
+            # Validate response is a dictionary
+            if not isinstance(parsed, dict):
+                raise ValueError(f"Expected JSON object, got {type(parsed).__name__}")
+
+            return parsed
+
+        except requests.RequestException as e:
+            raise RuntimeError(f"Local LLM API request failed: {str(e)}") from e
+        except Exception as e:
+            # Re-raise with context for any other errors
+            raise RuntimeError(f"Local LLM API call failed: {str(e)}") from e

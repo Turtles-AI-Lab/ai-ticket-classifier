@@ -17,6 +17,45 @@ class TicketCategory:
     priority: str = "medium"
     auto_resolvable: bool = False
 
+    def __post_init__(self):
+        """Validate TicketCategory fields after initialization"""
+        # Validate name
+        if not isinstance(self.name, str):
+            raise TypeError(f"name must be str, not {type(self.name).__name__}")
+        if not self.name:
+            raise ValueError("name cannot be empty")
+
+        # Validate description
+        if not isinstance(self.description, str):
+            raise TypeError(f"description must be str, not {type(self.description).__name__}")
+        if not self.description:
+            raise ValueError("description cannot be empty")
+
+        # Validate keywords
+        if not isinstance(self.keywords, list):
+            raise TypeError(f"keywords must be list, not {type(self.keywords).__name__}")
+        for i, keyword in enumerate(self.keywords):
+            if not isinstance(keyword, str):
+                raise TypeError(f"keywords[{i}] must be str, not {type(keyword).__name__}")
+
+        # Validate patterns
+        if not isinstance(self.patterns, list):
+            raise TypeError(f"patterns must be list, not {type(self.patterns).__name__}")
+        for i, pattern in enumerate(self.patterns):
+            if not isinstance(pattern, str):
+                raise TypeError(f"patterns[{i}] must be str, not {type(pattern).__name__}")
+
+        # Validate priority
+        if not isinstance(self.priority, str):
+            raise TypeError(f"priority must be str, not {type(self.priority).__name__}")
+        valid_priorities = ["low", "medium", "high", "critical"]
+        if self.priority not in valid_priorities:
+            raise ValueError(f"priority must be one of {valid_priorities}, got '{self.priority}'")
+
+        # Validate auto_resolvable
+        if not isinstance(self.auto_resolvable, bool):
+            raise TypeError(f"auto_resolvable must be bool, not {type(self.auto_resolvable).__name__}")
+
     def __repr__(self):
         return f"TicketCategory(name='{self.name}', priority='{self.priority}')"
 
@@ -94,17 +133,17 @@ DEFAULT_CATEGORIES = [
         description="Software installation or update request",
         keywords=["install", "software", "application", "teams", "zoom", "office", "chrome"],
         patterns=[
-            r"install.*software",
-            r"install.*\w+.*on",
-            r"need.*install",
-            r"install.*application",
-            r"download.*and.*install",
-            r"please.*install",
-            r"need.*\w+.*on.*laptop",
-            r"need.*\w+.*on.*computer",
-            r"install.*teams",
-            r"install.*zoom",
-            r"install.*office"
+            r"install\s+software",
+            r"install\s+\w+\s+on",
+            r"need\s+install",
+            r"install\s+application",
+            r"download\s+and\s+install",
+            r"please\s+install",
+            r"need\s+\w+\s+on\s+laptop",
+            r"need\s+\w+\s+on\s+computer",
+            r"install\s+teams",
+            r"install\s+zoom",
+            r"install\s+office"
         ],
         priority="medium",
         auto_resolvable=False
@@ -151,14 +190,14 @@ DEFAULT_CATEGORIES = [
         description="Hardware malfunction or replacement needed",
         keywords=["hardware", "broken", "monitor", "keyboard", "mouse", "laptop", "computer", "screen"],
         patterns=[
-            r"hardware.*fail",
-            r"monitor.*broken",
-            r"monitor.*not.*work\w*",
-            r"keyboard.*not.*work\w*",
-            r"mouse.*not.*work\w*",
-            r"laptop.*broken",
-            r"screen.*broken",
-            r"\w+.*is.*broken"
+            r"hardware\s+fail",
+            r"monitor\s+broken",
+            r"monitor\s+not\s+work\w*",
+            r"keyboard\s+not\s+work\w*",
+            r"mouse\s+not\s+work\w*",
+            r"laptop\s+broken",
+            r"screen\s+broken",
+            r"\w+\s+is\s+broken"
         ],
         priority="medium",
         auto_resolvable=False
@@ -184,15 +223,15 @@ DEFAULT_CATEGORIES = [
         description="Application crash, error, or performance issue",
         keywords=["error", "crash", "slow", "frozen", "not responding", "bug", "excel", "word", "outlook"],
         patterns=[
-            r"application.*crash",
-            r"program.*error",
-            r"not.*responding",
-            r"software.*slow",
-            r"keeps.*crashing",
-            r"\w+.*crash",
-            r"\w+.*keeps.*crash",
-            r"\w+.*frozen",
-            r"\w+.*error"
+            r"application\s+crash",
+            r"program\s+error",
+            r"not\s+responding",
+            r"software\s+slow",
+            r"keeps\s+crashing",
+            r"\w+\s+crash",
+            r"\w+\s+keeps\s+crash",
+            r"\w+\s+frozen",
+            r"\w+\s+error"
         ],
         priority="medium",
         auto_resolvable=False

@@ -1,7 +1,21 @@
 from setuptools import setup, find_packages
+import os
 
-with open("README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+# Read README with proper exception handling
+long_description = ""
+readme_path = os.path.join(os.path.dirname(__file__), "README.md")
+try:
+    with open(readme_path, "r", encoding="utf-8") as fh:
+        long_description = fh.read()
+except FileNotFoundError:
+    print("Warning: README.md not found, using default description")
+    long_description = "A lightweight Python library for classifying support tickets using AI"
+except IOError as e:
+    print(f"Warning: Could not read README.md: {e}")
+    long_description = "A lightweight Python library for classifying support tickets using AI"
+except Exception as e:
+    print(f"Warning: Unexpected error reading README.md: {e}")
+    long_description = "A lightweight Python library for classifying support tickets using AI"
 
 setup(
     name="ai-ticket-classifier",
