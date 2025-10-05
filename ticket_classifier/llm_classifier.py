@@ -66,6 +66,8 @@ class LLMClassifier:
             raise ValueError("ticket_text cannot be None")
         if not isinstance(ticket_text, str):
             raise TypeError(f"ticket_text must be str, not {type(ticket_text).__name__}")
+        if not ticket_text.strip():
+            raise ValueError("ticket_text cannot be empty")
 
         try:
             # Make LLM call
@@ -262,6 +264,23 @@ Your response (JSON only):"""
         try:
             api_url = self.api_base or "http://127.0.0.1:1234/v1"
 
+            # Security warning for HTTP connections
+            if api_url.startswith("http://") and not api_url.startswith("http://127.0.0.1") and not api_url.startswith("http://localhost"):
+                import warnings
+                warnings.warn(
+                    "Using insecure HTTP connection to remote LLM. "
+                    "This exposes data to man-in-the-middle attacks. "
+                    "Use HTTPS for production deployments.",
+                    SecurityWarning,
+                    stacklevel=3
+                )
+
+            # Verify SSL for HTTPS connections (disable only if explicitly set)
+            verify_ssl = True
+            if api_url.startswith("http://127.0.0.1") or api_url.startswith("http://localhost"):
+                # localhost HTTP is acceptable for development
+                verify_ssl = False
+
             response = requests.post(
                 f"{api_url}/chat/completions",
                 json={
@@ -273,7 +292,8 @@ Your response (JSON only):"""
                     "temperature": 0.3,
                     "max_tokens": 150
                 },
-                timeout=30
+                timeout=30,
+                verify=verify_ssl
             )
 
             response.raise_for_status()
