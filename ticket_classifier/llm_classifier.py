@@ -3,6 +3,7 @@ LLM-based ticket classification using OpenAI, Azure OpenAI, or local LLMs
 """
 
 import json
+import logging
 from typing import Optional, Dict, Any
 from .classifier import ClassificationResult
 from .categories import TicketCategory, DEFAULT_CATEGORIES, get_category_by_name
@@ -116,9 +117,7 @@ class LLMClassifier:
 
         except Exception as e:
             # Fallback to "other" category on error
-            # Use logging instead of print in production
-            import logging
-            logging.warning(f"LLM classification error: {e}")
+            logging.warning(f"LLM classification error: {e}", exc_info=True)
             other_category = get_category_by_name("other")
             if other_category is None:
                 raise ValueError("Could not find 'other' category in DEFAULT_CATEGORIES")

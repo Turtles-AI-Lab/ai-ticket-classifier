@@ -3,6 +3,7 @@ Core ticket classification engine using pattern matching
 """
 
 import re
+import logging
 from typing import List, Dict, Tuple, Optional
 from .categories import TicketCategory, DEFAULT_CATEGORIES
 
@@ -172,7 +173,6 @@ class TicketClassifier:
                     matched_patterns.append(pattern)
             except re.error as e:
                 # Skip invalid regex patterns with warning
-                import logging
                 logging.warning(f"Invalid regex pattern '{pattern}' in category '{category.name}': {e}")
 
         # Check keywords (lower weight)

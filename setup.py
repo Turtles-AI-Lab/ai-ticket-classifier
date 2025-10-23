@@ -46,13 +46,14 @@ setup(
     ],
     extras_require={
         "llm": [
-            "openai>=1.0.0",
-            "requests>=2.31.0",
+            "openai>=1.0.0,<2.0.0",  # Pin to v1.x with upper bound
+            "requests>=2.32.0,<3.0.0",  # Updated to latest secure version
         ],
         "dev": [
-            "pytest>=7.0.0",
-            "black>=23.0.0",
-            "flake8>=6.0.0",
+            "pytest>=8.0.0,<9.0.0",  # Updated to latest
+            "black>=24.0.0,<25.0.0",  # Updated to latest
+            "flake8>=7.0.0,<8.0.0",  # Updated to latest
+            "mypy>=1.0.0,<2.0.0",  # Added type checking
         ],
     },
     keywords="ticket classification, support tickets, ai, nlp, helpdesk, automation",
