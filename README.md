@@ -1,5 +1,13 @@
 # 🎫 AI Ticket Classifier
 
+
+![GitHub stars](https://img.shields.io/github/stars/Turtles-AI-Lab/ai-ticket-classifier?style=social)
+![GitHub forks](https://img.shields.io/github/forks/Turtles-AI-Lab/ai-ticket-classifier?style=social)
+![GitHub issues](https://img.shields.io/github/issues/Turtles-AI-Lab/ai-ticket-classifier)
+![GitHub license](https://img.shields.io/github/license/Turtles-AI-Lab/ai-ticket-classifier)
+![GitHub last commit](https://img.shields.io/github/last-commit/Turtles-AI-Lab/ai-ticket-classifier)
+
+
 A lightweight, production-ready Python library for automatically classifying support tickets using pattern matching and optional LLM integration.
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
